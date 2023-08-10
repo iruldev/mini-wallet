@@ -1,0 +1,10 @@
+**/*.env
+.idea
+.vscode
+*.log
+data
+build
+
+go.work.sum
+go.sum
+**/*.DS_Store
