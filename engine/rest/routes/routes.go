@@ -1,6 +1,7 @@
 package routes
 
 import (
+	injector "github.com/iruldev/mini-wallet/src"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -13,4 +14,12 @@ func AppRoutes(r *mux.Router) {
 		res := helper.PlugResponse(w)
 		_ = res.ReplyCustom(http.StatusOK, helper.NewResponse(constant.SUCCESS, "Service is running well"))
 	}).Methods(http.MethodGet)
+
+	// Define All Controller
+	walletController, _ := injector.InitializeWalletControllerREST()
+	apiSR := r.PathPrefix("/api").Subrouter()
+	// V1
+	v1SR := apiSR.PathPrefix("/v1").Subrouter()
+
+	WalletRoutes(v1SR, walletController)
 }
