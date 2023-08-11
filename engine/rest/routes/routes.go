@@ -1,8 +1,9 @@
 package routes
 
 import (
-	injector "github.com/iruldev/mini-wallet/src"
 	"net/http"
+
+	injector "github.com/iruldev/mini-wallet/src"
 
 	"github.com/gorilla/mux"
 	"github.com/iruldev/mini-wallet/src/constant"

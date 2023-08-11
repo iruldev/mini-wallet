@@ -1,19 +1,32 @@
 package controller
 
 import (
+	"net/http"
+
+	"github.com/iruldev/mini-wallet/engine/rest/transformer"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/iruldev/mini-wallet/src/constant"
 	"github.com/iruldev/mini-wallet/src/helper"
 	"github.com/iruldev/mini-wallet/src/service"
-	"net/http"
 )
 
 type WalletControllerImpl struct {
-	Validator *validator.Validate
+	Validator   *validator.Validate
+	Service     service.WalletService
+	Transformer transformer.WalletTransformer
 }
 
-func NewWalletController(validator *validator.Validate) WalletController {
-	return &WalletControllerImpl{Validator: validator}
+func NewWalletController(
+	validator *validator.Validate,
+	walletService service.WalletService,
+	transformer transformer.WalletTransformer,
+) WalletController {
+	return &WalletControllerImpl{
+		Validator:   validator,
+		Service:     walletService,
+		Transformer: transformer,
+	}
 }
 
 func (c WalletControllerImpl) InitWallet(w http.ResponseWriter, r *http.Request) {
@@ -28,5 +41,7 @@ func (c WalletControllerImpl) InitWallet(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	_ = res.ReplyCustom(http.StatusOK, helper.NewResponse(constant.SUCCESS, struct{}{}))
+	token, _ := c.Service.InitWallet(r.Context(), pReq)
+
+	_ = res.ReplyCustom(http.StatusOK, helper.NewResponse(constant.SUCCESS, c.Transformer.TransformInitWallet(token)))
 }

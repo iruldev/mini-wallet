@@ -1,9 +1,10 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/iruldev/mini-wallet/engine/rest/controller"
-	"net/http"
 )
 
 func WalletRoutes(r *mux.Router, c controller.WalletController) {

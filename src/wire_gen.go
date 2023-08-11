@@ -9,12 +9,28 @@ package injector
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/iruldev/mini-wallet/engine/rest/controller"
+	"github.com/iruldev/mini-wallet/engine/rest/transformer"
+	"github.com/iruldev/mini-wallet/src/service"
+	"github.com/iruldev/mini-wallet/src/token"
+	"github.com/spf13/viper"
+
+	_ "github.com/iruldev/mini-wallet/src/config"
 )
 
 // Injectors from injector.go:
 
 func InitializeWalletControllerREST() (controller.WalletController, error) {
 	validate := validator.New()
-	walletController := controller.NewWalletController(validate)
+	string2 := jwtSecretKey()
+	maker := token.NewJWTMaker(string2)
+	walletService := service.NewWalletService(maker)
+	walletTransformer := transformer.NewWalletTransformer()
+	walletController := controller.NewWalletController(validate, walletService, walletTransformer)
 	return walletController, nil
+}
+
+// injector.go:
+
+func jwtSecretKey() string {
+	return viper.GetString("JWT_SECRET_KEY")
 }

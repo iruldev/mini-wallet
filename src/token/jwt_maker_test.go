@@ -1,9 +1,10 @@
 package token
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestJWTMaker(t *testing.T) {
