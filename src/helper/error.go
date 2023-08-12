@@ -4,6 +4,10 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+type ErrData struct {
+	Error any `json:"error"`
+}
+
 type ErrField struct {
 	Field   string `json:"field"`
 	Message string `json:"message"`

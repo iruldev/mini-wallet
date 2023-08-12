@@ -1,6 +1,7 @@
 package constant
 
 const (
-	SUCCESS = "success"
-	FAILED  = "fail"
+	SUCCESS                 = "success"
+	FAILED                  = "fail"
+	AuthorizationPayloadKey = "authorization_payload"
 )

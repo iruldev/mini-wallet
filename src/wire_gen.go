@@ -10,6 +10,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/iruldev/mini-wallet/engine/rest/controller"
 	"github.com/iruldev/mini-wallet/engine/rest/transformer"
+	"github.com/iruldev/mini-wallet/src/database"
+	"github.com/iruldev/mini-wallet/src/repository"
 	"github.com/iruldev/mini-wallet/src/service"
 	"github.com/iruldev/mini-wallet/src/token"
 	"github.com/spf13/viper"
@@ -21,9 +23,11 @@ import (
 
 func InitializeWalletControllerREST() (controller.WalletController, error) {
 	validate := validator.New()
-	string2 := jwtSecretKey()
+	string2 := JwtSecretKey()
 	maker := token.NewJWTMaker(string2)
-	walletService := service.NewWalletService(maker)
+	db := database.GetDB()
+	walletRepository := repository.NewWalletRepository(db)
+	walletService := service.NewWalletService(maker, walletRepository)
 	walletTransformer := transformer.NewWalletTransformer()
 	walletController := controller.NewWalletController(validate, walletService, walletTransformer)
 	return walletController, nil
@@ -31,6 +35,6 @@ func InitializeWalletControllerREST() (controller.WalletController, error) {
 
 // injector.go:
 
-func jwtSecretKey() string {
+func JwtSecretKey() string {
 	return viper.GetString("JWT_SECRET_KEY")
 }

@@ -3,6 +3,7 @@ package migrations
 import (
 	"context"
 	"database/sql"
+
 	"github.com/iruldev/mini-wallet/src/database"
 	"github.com/iruldev/mini-wallet/src/model/entity"
 	"github.com/pressly/goose/v3"
