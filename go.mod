@@ -11,9 +11,9 @@ require (
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/pressly/goose/v3 v3.14.0
+	github.com/shopspring/decimal v1.3.1
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.3
-	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.3
 )
@@ -42,7 +42,6 @@ require (
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
 	golang.org/x/text v0.11.0 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
