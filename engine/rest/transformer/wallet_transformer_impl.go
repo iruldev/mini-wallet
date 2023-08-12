@@ -27,7 +27,7 @@ func (WalletTransformerImpl) TransformWallet(data *entity.Wallet) *WalletRespons
 		OwnedBy:   data.CustomerXID,
 		Status:    "enabled",
 		EnabledAt: enabledAt,
-		Balance:   data.BalanceAvailable.InexactFloat64(),
+		Balance:   data.Balance.InexactFloat64(),
 	}}
 }
 
@@ -37,6 +37,6 @@ func (WalletTransformerImpl) TransformWalletDisable(data *entity.Wallet) *Wallet
 		OwnedBy:    data.CustomerXID,
 		Status:     "disabled",
 		DisabledAt: time.Now().Format(time.RFC3339),
-		Balance:    data.BalanceAvailable.InexactFloat64(),
+		Balance:    data.Balance.InexactFloat64(),
 	}}
 }

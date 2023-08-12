@@ -54,7 +54,7 @@ func (c WalletControllerImpl) EnableWallet(w http.ResponseWriter, r *http.Reques
 
 	wallet, err := c.Service.ActivateWallet(r.Context(), authPayload.CustomerXID)
 	if err != nil {
-		_ = res.ReplyCustom(http.StatusOK, helper.NewResponse(constant.SUCCESS, helper.ErrData{Error: err.Error()}))
+		_ = res.ReplyCustom(http.StatusBadRequest, helper.NewResponse(constant.FAILED, helper.ErrData{Error: err.Error()}))
 		return
 	}
 
@@ -67,7 +67,7 @@ func (c WalletControllerImpl) DisableWallet(w http.ResponseWriter, r *http.Reque
 
 	wallet, err := c.Service.DeactivateWallet(r.Context(), authPayload.CustomerXID)
 	if err != nil {
-		_ = res.ReplyCustom(http.StatusOK, helper.NewResponse(constant.SUCCESS, helper.ErrData{Error: err.Error()}))
+		_ = res.ReplyCustom(http.StatusBadRequest, helper.NewResponse(constant.FAILED, helper.ErrData{Error: err.Error()}))
 		return
 	}
 
@@ -80,7 +80,7 @@ func (c WalletControllerImpl) GetWallet(w http.ResponseWriter, r *http.Request) 
 
 	wallet, err := c.Service.GetWallet(r.Context(), authPayload.CustomerXID)
 	if err != nil {
-		_ = res.ReplyCustom(http.StatusOK, helper.NewResponse(constant.SUCCESS, helper.ErrData{Error: err.Error()}))
+		_ = res.ReplyCustom(http.StatusBadRequest, helper.NewResponse(constant.FAILED, helper.ErrData{Error: err.Error()}))
 		return
 	}
 

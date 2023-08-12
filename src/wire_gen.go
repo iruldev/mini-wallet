@@ -33,6 +33,16 @@ func InitializeWalletControllerREST() (controller.WalletController, error) {
 	return walletController, nil
 }
 
+func InitializeTransactionControllerREST() (controller.TransactionController, error) {
+	validate := validator.New()
+	db := database.GetDB()
+	transactionRepository := repository.NewTransactionRepository(db)
+	transactionService := service.NewTransactionService(transactionRepository)
+	transactionTransformer := transformer.NewTransactionTransformer()
+	transactionController := controller.NewTransactionController(validate, transactionService, transactionTransformer)
+	return transactionController, nil
+}
+
 // injector.go:
 
 func JwtSecretKey() string {

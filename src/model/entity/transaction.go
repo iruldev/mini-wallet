@@ -8,6 +8,7 @@ import (
 
 type Transaction struct {
 	BaseEntity
+	CustomerXID string          `json:"customer_xid" gorm:"column:customer_xid;type:char(36);index;not null"`
 	Type        string          `json:"type" gorm:"type:varchar(30);index;not null"`
 	ReferenceID string          `json:"reference_id" gorm:"column:reference_id;type:varchar(100);index;not null"`
 	At          *time.Time      `json:"at" gorm:"type:timestamp;null"`

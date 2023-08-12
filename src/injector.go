@@ -35,3 +35,15 @@ func InitializeWalletControllerREST() (controller.WalletController, error) {
 	)
 	return nil, nil
 }
+
+func InitializeTransactionControllerREST() (controller.TransactionController, error) {
+	wire.Build(
+		controller.NewTransactionController,
+		validator.New,
+		service.NewTransactionService,
+		transformer.NewTransactionTransformer,
+		repository.NewTransactionRepository,
+		database.GetDB,
+	)
+	return nil, nil
+}

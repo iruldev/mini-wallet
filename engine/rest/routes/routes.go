@@ -18,9 +18,13 @@ func AppRoutes(r *mux.Router) {
 
 	// Define All Controller
 	walletController, _ := injector.InitializeWalletControllerREST()
+	transactionController, _ := injector.InitializeTransactionControllerREST()
+
 	apiSR := r.PathPrefix("/api").Subrouter()
+
 	// V1
 	v1SR := apiSR.PathPrefix("/v1").Subrouter()
 
 	WalletRoutes(v1SR, walletController)
+	TransactionRoutes(v1SR, transactionController)
 }
