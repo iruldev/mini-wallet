@@ -3,6 +3,8 @@ package controller
 import (
 	"net/http"
 
+	"github.com/iruldev/mini-wallet/src/model/entity"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/iruldev/mini-wallet/engine/rest/transformer"
 	"github.com/iruldev/mini-wallet/src/constant"
@@ -41,7 +43,7 @@ func (c TransactionControllerImpl) Deposit(w http.ResponseWriter, r *http.Reques
 	authPayload := r.Context().Value(constant.AuthorizationPayloadKey).(*token.Payload)
 
 	pReq, _ := helper.ParseTo[service.TransactionReq](req)
-	pReq.Type = service.DEPOSIT
+	pReq.Type = entity.DEPOSIT
 	//err := c.Validator.Struct(pReq)
 	//fmt.Println("pReq", pReq)
 	//fmt.Println("err", err)
@@ -60,7 +62,7 @@ func (c TransactionControllerImpl) Withdrawal(w http.ResponseWriter, r *http.Req
 
 	authPayload := r.Context().Value(constant.AuthorizationPayloadKey).(*token.Payload)
 	pReq, _ := helper.ParseTo[service.TransactionReq](req)
-	pReq.Type = service.WITHDRAWAL
+	pReq.Type = entity.WITHDRAWAL
 
 	trns, err := c.Service.Transaction(r.Context(), authPayload.CustomerXID, pReq)
 	if err != nil {

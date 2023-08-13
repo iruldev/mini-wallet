@@ -9,4 +9,5 @@ import (
 type TransactionService interface {
 	GetTransactions(ctx context.Context, customerXID string) ([]*entity.Transaction, error)
 	Transaction(ctx context.Context, customerXID string, params TransactionReq) (*entity.Transaction, error)
+	CompleteTransaction(ctx context.Context, data entity.Transaction) (*entity.Transaction, error)
 }

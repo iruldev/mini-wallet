@@ -13,6 +13,9 @@ type TransactionRepository interface {
 	GetAll(ctx context.Context) ([]*entity.Transaction, error)
 	Create(ctx context.Context, data *entity.Transaction) (*entity.Transaction, error)
 	Update(ctx context.Context, data *entity.Transaction) error
+	Process(ctx context.Context, data *entity.Transaction) error
+	Complete(ctx context.Context, data *entity.Transaction) error
+	Fail(ctx context.Context, data *entity.Transaction) error
 
 	Clean() TransactionRepository
 }

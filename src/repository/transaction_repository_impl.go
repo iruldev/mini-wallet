@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/iruldev/mini-wallet/src/model/entity"
 	"gorm.io/gorm"
@@ -83,6 +84,162 @@ func (r *TransactionRepositoryImpl) Update(ctx context.Context, data *entity.Tra
 	}
 
 	return db.Save(data).Error
+}
+
+func (r *TransactionRepositoryImpl) Complete(ctx context.Context, data *entity.Transaction) error {
+	defer r.Clean() // clean where query on executed
+	defer func() {
+		if e := recover(); e != nil {
+			fmt.Println("Recovered in e", e)
+		}
+	}()
+
+	db := r.db.WithContext(ctx)
+	// CHECK WITHOUT LOCKING
+	if db.First(&data, "id = ?", data.ID).RowsAffected == 0 {
+		return errors.New("transaction not found")
+	}
+
+	if data.IsCompleted > 0 {
+		return errors.New("transaction already complete")
+	}
+
+	if data.IsFailed > 0 {
+		return errors.New("transaction already failed")
+	}
+
+	if data.IsProcessed == 0 {
+		e := r.Process(ctx, data)
+		if e != nil {
+			return e
+		}
+	}
+
+	err := db.Transaction(func(tx *gorm.DB) error {
+		// DOUBLE CHECK WITH LOCKING
+		if tx.First(&data, "id = ?", data.ID).RowsAffected == 0 {
+			return errors.New("transaction not found")
+		}
+
+		if data.IsProcessed == 0 {
+			return errors.New("transaction not processed")
+		}
+
+		if data.IsCompleted > 0 {
+			return errors.New("transaction already complete")
+		}
+
+		if data.IsFailed > 0 {
+			return errors.New("transaction already failed")
+		}
+
+		var wallet *entity.Wallet
+		if tx.First(&wallet, "customer_xid = ?", data.CustomerXID).RowsAffected == 0 {
+			return errors.New("wallet not found")
+		}
+
+		if data.Type == entity.WITHDRAWAL {
+			if data.Amount.GreaterThan(wallet.Balance) {
+				return errors.New("balance not enough")
+			}
+			wallet.Balance = wallet.Balance.Sub(data.Amount)
+		} else if data.Type == entity.DEPOSIT {
+			wallet.Balance = wallet.Balance.Add(data.Amount)
+		} else {
+			return errors.New("unsupported type")
+		}
+
+		if err := tx.Save(wallet).Error; err != nil {
+			return err
+		}
+
+		data.IsCompleted = 1
+		if err := tx.Save(data).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		_ = r.Fail(ctx, data)
+	}
+
+	return err
+}
+
+func (r *TransactionRepositoryImpl) Process(ctx context.Context, data *entity.Transaction) error {
+	defer r.Clean() // clean where query on executed
+	defer func() {
+		if e := recover(); e != nil {
+			fmt.Println("Recovered in e", e)
+		}
+	}()
+
+	db := r.db.WithContext(ctx)
+	err := db.Transaction(func(tx *gorm.DB) error {
+		// DOUBLE CHECK WITH LOCKING
+		if tx.First(&data, "id = ?", data.ID).RowsAffected == 0 {
+			return errors.New("transaction not found")
+		}
+
+		if data.IsProcessed > 0 {
+			return errors.New("transaction already processed")
+		}
+
+		if data.IsCompleted > 0 {
+			return errors.New("transaction already complete")
+		}
+
+		if data.IsFailed > 0 {
+			return errors.New("transaction already failed")
+		}
+
+		data.IsProcessed = 1
+		if err := tx.Save(data).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		_ = r.Fail(ctx, data)
+	}
+
+	return err
+}
+
+func (r *TransactionRepositoryImpl) Fail(ctx context.Context, data *entity.Transaction) error {
+	defer r.Clean() // clean where query on executed
+	defer func() {
+		if e := recover(); e != nil {
+			fmt.Println("Recovered in e", e)
+		}
+	}()
+
+	db := r.db.WithContext(ctx)
+	err := db.Transaction(func(tx *gorm.DB) error {
+		// DOUBLE CHECK WITH LOCKING
+		if tx.First(&data, "id = ?", data.ID).RowsAffected == 0 {
+			return errors.New("transaction not found")
+		}
+
+		if data.IsCompleted > 0 {
+			return errors.New("transaction already complete")
+		}
+
+		if data.IsFailed > 0 {
+			return errors.New("transaction already fail")
+		}
+
+		data.IsFailed = 1
+		if err := tx.Save(data).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	return err
 }
 
 func (r *TransactionRepositoryImpl) Clean() TransactionRepository {
