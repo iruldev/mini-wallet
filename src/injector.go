@@ -22,16 +22,22 @@ func JwtSecretKey() string {
 	return viper.GetString("JWT_SECRET_KEY")
 }
 
+func InitializeWalletService() service.WalletService {
+	wire.Build(service.NewWalletService,
+		token.NewJWTMaker,
+		JwtSecretKey,
+		repository.NewWalletRepository,
+		database.GetDB,
+	)
+	return nil
+}
+
 func InitializeWalletControllerREST() (controller.WalletController, error) {
 	wire.Build(
 		controller.NewWalletController,
 		validator.New,
-		service.NewWalletService,
-		token.NewJWTMaker,
-		JwtSecretKey,
+		InitializeWalletService,
 		transformer.NewWalletTransformer,
-		repository.NewWalletRepository,
-		database.GetDB,
 	)
 	return nil, nil
 }
@@ -42,6 +48,7 @@ func InitializeTransactionControllerREST() (controller.TransactionController, er
 		validator.New,
 		service.NewTransactionService,
 		transformer.NewTransactionTransformer,
+		InitializeWalletService,
 		repository.NewTransactionRepository,
 		database.GetDB,
 	)

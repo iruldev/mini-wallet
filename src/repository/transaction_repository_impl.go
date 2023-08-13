@@ -25,8 +25,18 @@ func (r *TransactionRepositoryImpl) buildQuery() *gorm.DB {
 	return r.db
 }
 
+func (r *TransactionRepositoryImpl) ForCustomerXID(customerXID string) TransactionRepository {
+	r.whereQuery = r.buildQuery().Where("customer_xid = ?", customerXID)
+	return r
+}
+
 func (r *TransactionRepositoryImpl) ForReferenceID(referenceID string) TransactionRepository {
 	r.whereQuery = r.buildQuery().Where("reference_id = ?", referenceID)
+	return r
+}
+
+func (r *TransactionRepositoryImpl) ForProcessed() TransactionRepository {
+	r.whereQuery = r.buildQuery().Where("is_processed = 1")
 	return r
 }
 
@@ -48,18 +58,17 @@ func (r *TransactionRepositoryImpl) Get(ctx context.Context) (*entity.Transactio
 
 func (r *TransactionRepositoryImpl) GetAll(ctx context.Context) ([]*entity.Transaction, error) {
 	defer r.Clean() // clean where query on executed
-	db := r.buildQuery().WithContext(ctx)
 
-	var funds []*entity.Transaction
-	err := db.Find(&funds).Error
+	var trns []*entity.Transaction
+	err := r.buildQuery().Order("created_at DESC").Find(&trns).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return funds, nil
+			return trns, nil
 		}
 		return nil, err
 	}
 
-	return funds, nil
+	return trns, nil
 }
 
 func (r *TransactionRepositoryImpl) Create(ctx context.Context, data *entity.Transaction) (*entity.Transaction, error) {

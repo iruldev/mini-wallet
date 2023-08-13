@@ -7,7 +7,9 @@ import (
 )
 
 type TransactionRepository interface {
+	ForCustomerXID(customerXID string) TransactionRepository
 	ForReferenceID(referenceID string) TransactionRepository
+	ForProcessed() TransactionRepository
 
 	Get(ctx context.Context) (*entity.Transaction, error)
 	GetAll(ctx context.Context) ([]*entity.Transaction, error)

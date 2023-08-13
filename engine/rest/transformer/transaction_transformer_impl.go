@@ -34,3 +34,19 @@ func (TransactionTransformerImpl) TransformerWithdrawal(data *entity.Transaction
 		ReferenceID: data.ReferenceID,
 	}}
 }
+
+func (i TransactionTransformerImpl) TransformerTransactions(data []*entity.Transaction) *TransactionsResponseData {
+	list := make([]*TransactionData, 0)
+	for _, item := range data {
+		list = append(list, &TransactionData{
+			ID:           item.ID.String(),
+			Status:       item.Status,
+			TransactedAt: item.At.Format(time.RFC3339),
+			Type:         item.Type,
+			Amount:       item.Amount.InexactFloat64(),
+			ReferenceID:  item.ReferenceID,
+		})
+	}
+
+	return &TransactionsResponseData{Transactions: list}
+}

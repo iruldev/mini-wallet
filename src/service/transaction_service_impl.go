@@ -20,8 +20,7 @@ func NewTransactionService(repo repository.TransactionRepository) TransactionSer
 }
 
 func (s *TransactionServiceImpl) GetTransactions(ctx context.Context, customerXID string) ([]*entity.Transaction, error) {
-	//TODO implement me
-	panic("implement me")
+	return s.Repository.ForCustomerXID(customerXID).ForProcessed().GetAll(ctx)
 }
 
 func (s *TransactionServiceImpl) Transaction(ctx context.Context, customerXID string, params TransactionReq) (*entity.Transaction, error) {

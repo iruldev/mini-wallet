@@ -15,19 +15,26 @@ import (
 	"github.com/iruldev/mini-wallet/src/service"
 	"github.com/iruldev/mini-wallet/src/token"
 	"github.com/spf13/viper"
+)
 
+import (
 	_ "github.com/iruldev/mini-wallet/src/config"
 )
 
 // Injectors from injector.go:
 
-func InitializeWalletControllerREST() (controller.WalletController, error) {
-	validate := validator.New()
+func InitializeWalletService() service.WalletService {
 	string2 := JwtSecretKey()
 	maker := token.NewJWTMaker(string2)
 	db := database.GetDB()
 	walletRepository := repository.NewWalletRepository(db)
 	walletService := service.NewWalletService(maker, walletRepository)
+	return walletService
+}
+
+func InitializeWalletControllerREST() (controller.WalletController, error) {
+	validate := validator.New()
+	walletService := InitializeWalletService()
 	walletTransformer := transformer.NewWalletTransformer()
 	walletController := controller.NewWalletController(validate, walletService, walletTransformer)
 	return walletController, nil
@@ -39,7 +46,8 @@ func InitializeTransactionControllerREST() (controller.TransactionController, er
 	transactionRepository := repository.NewTransactionRepository(db)
 	transactionService := service.NewTransactionService(transactionRepository)
 	transactionTransformer := transformer.NewTransactionTransformer()
-	transactionController := controller.NewTransactionController(validate, transactionService, transactionTransformer)
+	walletService := InitializeWalletService()
+	transactionController := controller.NewTransactionController(validate, transactionService, transactionTransformer, walletService)
 	return transactionController, nil
 }
 

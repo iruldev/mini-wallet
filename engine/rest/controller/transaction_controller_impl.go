@@ -14,26 +14,45 @@ import (
 )
 
 type TransactionControllerImpl struct {
-	Validator   *validator.Validate
-	Service     service.TransactionService
-	Transformer transformer.TransactionTransformer
+	Validator     *validator.Validate
+	Service       service.TransactionService
+	Transformer   transformer.TransactionTransformer
+	WalletService service.WalletService
 }
 
 func NewTransactionController(
 	validator *validator.Validate,
 	service service.TransactionService,
 	transformer transformer.TransactionTransformer,
+	walletService service.WalletService,
 ) TransactionController {
 	return &TransactionControllerImpl{
-		Validator:   validator,
-		Service:     service,
-		Transformer: transformer,
+		Validator:     validator,
+		Service:       service,
+		Transformer:   transformer,
+		WalletService: walletService,
 	}
 }
 
 func (c TransactionControllerImpl) GetTransactions(w http.ResponseWriter, r *http.Request) {
-	//TODO implement me
-	panic("implement me")
+	res := helper.PlugResponse(w)
+
+	authPayload := r.Context().Value(constant.AuthorizationPayloadKey).(*token.Payload)
+
+	wallet, err := c.WalletService.GetWallet(r.Context(), authPayload.CustomerXID)
+	if err != nil {
+		_ = res.ReplyCustom(http.StatusNotFound, helper.NewResponse(constant.FAILED, helper.ErrData{Error: err.Error()}))
+		return
+	}
+
+	trns, err := c.Service.GetTransactions(r.Context(), wallet.CustomerXID)
+	if err != nil || trns == nil {
+		_ = res.ReplyCustom(http.StatusNotFound, helper.NewResponse(constant.FAILED, helper.ErrData{Error: "no transactions found"}))
+		return
+	}
+
+	_ = res.ReplyCustom(http.StatusOK, helper.NewResponse(constant.SUCCESS, c.Transformer.TransformerTransactions(trns)))
+
 }
 
 func (c TransactionControllerImpl) Deposit(w http.ResponseWriter, r *http.Request) {
@@ -47,13 +66,20 @@ func (c TransactionControllerImpl) Deposit(w http.ResponseWriter, r *http.Reques
 	//err := c.Validator.Struct(pReq)
 	//fmt.Println("pReq", pReq)
 	//fmt.Println("err", err)
-	trns, err := c.Service.Transaction(r.Context(), authPayload.CustomerXID, pReq)
+
+	wallet, err := c.WalletService.GetWallet(r.Context(), authPayload.CustomerXID)
+	if err != nil {
+		_ = res.ReplyCustom(http.StatusNotFound, helper.NewResponse(constant.FAILED, helper.ErrData{Error: err.Error()}))
+		return
+	}
+
+	trns, err := c.Service.Transaction(r.Context(), wallet.CustomerXID, pReq)
 	if err != nil {
 		_ = res.ReplyCustom(http.StatusBadRequest, helper.NewResponse(constant.FAILED, helper.ErrData{Error: err.Error()}))
 		return
 	}
 
-	_ = res.ReplyCustom(http.StatusOK, helper.NewResponse(constant.SUCCESS, c.Transformer.TransformerDeposit(trns)))
+	_ = res.ReplyCustom(http.StatusCreated, helper.NewResponse(constant.SUCCESS, c.Transformer.TransformerDeposit(trns)))
 }
 
 func (c TransactionControllerImpl) Withdrawal(w http.ResponseWriter, r *http.Request) {
@@ -64,11 +90,17 @@ func (c TransactionControllerImpl) Withdrawal(w http.ResponseWriter, r *http.Req
 	pReq, _ := helper.ParseTo[service.TransactionReq](req)
 	pReq.Type = entity.WITHDRAWAL
 
-	trns, err := c.Service.Transaction(r.Context(), authPayload.CustomerXID, pReq)
+	wallet, err := c.WalletService.GetWallet(r.Context(), authPayload.CustomerXID)
+	if err != nil {
+		_ = res.ReplyCustom(http.StatusNotFound, helper.NewResponse(constant.FAILED, helper.ErrData{Error: err.Error()}))
+		return
+	}
+
+	trns, err := c.Service.Transaction(r.Context(), wallet.CustomerXID, pReq)
 	if err != nil {
 		_ = res.ReplyCustom(http.StatusBadRequest, helper.NewResponse(constant.FAILED, helper.ErrData{Error: err.Error()}))
 		return
 	}
 
-	_ = res.ReplyCustom(http.StatusOK, helper.NewResponse(constant.SUCCESS, c.Transformer.TransformerWithdrawal(trns)))
+	_ = res.ReplyCustom(http.StatusCreated, helper.NewResponse(constant.SUCCESS, c.Transformer.TransformerWithdrawal(trns)))
 }
