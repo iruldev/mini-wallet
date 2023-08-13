@@ -4,8 +4,9 @@
 package injector
 
 import (
-	"github.com/iruldev/mini-wallet/engine/rest/transformer"
 	_ "github.com/iruldev/mini-wallet/src/config"
+
+	"github.com/iruldev/mini-wallet/engine/rest/transformer"
 	"github.com/iruldev/mini-wallet/src/database"
 	"github.com/iruldev/mini-wallet/src/repository"
 

@@ -62,10 +62,14 @@ func (c TransactionControllerImpl) Deposit(w http.ResponseWriter, r *http.Reques
 	authPayload := r.Context().Value(constant.AuthorizationPayloadKey).(*token.Payload)
 
 	pReq, _ := helper.ParseTo[service.TransactionReq](req)
+	err := c.Validator.Struct(pReq)
+	if err != nil {
+		errF := helper.GetErrMsgField(err)
+		_ = res.ReplyCustom(http.StatusBadRequest, helper.NewResponse(constant.FAILED, helper.ErrData{Error: errF}))
+		return
+	}
+
 	pReq.Type = entity.DEPOSIT
-	//err := c.Validator.Struct(pReq)
-	//fmt.Println("pReq", pReq)
-	//fmt.Println("err", err)
 
 	wallet, err := c.WalletService.GetWallet(r.Context(), authPayload.CustomerXID)
 	if err != nil {
@@ -88,6 +92,13 @@ func (c TransactionControllerImpl) Withdrawal(w http.ResponseWriter, r *http.Req
 
 	authPayload := r.Context().Value(constant.AuthorizationPayloadKey).(*token.Payload)
 	pReq, _ := helper.ParseTo[service.TransactionReq](req)
+	err := c.Validator.Struct(pReq)
+	if err != nil {
+		errF := helper.GetErrMsgField(err)
+		_ = res.ReplyCustom(http.StatusBadRequest, helper.NewResponse(constant.FAILED, helper.ErrData{Error: errF}))
+		return
+	}
+
 	pReq.Type = entity.WITHDRAWAL
 
 	wallet, err := c.WalletService.GetWallet(r.Context(), authPayload.CustomerXID)

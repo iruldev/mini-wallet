@@ -39,7 +39,7 @@ func (c WalletControllerImpl) InitWallet(w http.ResponseWriter, r *http.Request)
 	err := c.Validator.Struct(pReq)
 	if err != nil {
 		errF := helper.GetErrMsgField(err)
-		_ = res.ReplyCustom(http.StatusBadRequest, helper.NewResponse(constant.FAILED, errF))
+		_ = res.ReplyCustom(http.StatusBadRequest, helper.NewResponse(constant.FAILED, helper.ErrData{Error: errF}))
 		return
 	}
 
