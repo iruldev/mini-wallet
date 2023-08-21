@@ -1,5 +1,5 @@
 # mini-wallet
-Mini Wallet Exercise JULO
+[Mini Wallet Exercise JULO](https://documenter.getpostman.com/view/8411283/SVfMSqA3?version=latest)
 
 ## Getting started
 
