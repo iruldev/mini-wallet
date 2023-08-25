@@ -39,6 +39,10 @@ func (s *TransactionServiceImpl) Transaction(ctx context.Context, customerXID st
 		return nil, err
 	}
 
+	if amount.IsZero() || amount.IsNegative() {
+		return nil, errors.New(fmt.Sprintf("amount must be greater than 0"))
+	}
+
 	trns, err := s.Repository.Create(ctx, &entity.Transaction{
 		CustomerXID: customerXID,
 		Type:        params.Type,
